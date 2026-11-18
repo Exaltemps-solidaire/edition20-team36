@@ -3,10 +3,16 @@
 import { useState } from "react";
 import styles from "./page.module.css";
 import { personas, type Persona } from "./personas";
-import { grouperSessionsParStatut, sessions } from "./sessions";
+import { creerSession, grouperSessionsParStatut, sessions as sessionsInitiales } from "./sessions";
+
+const MODULES = ["Fresque de la rue", "Accueil inconditionnel (Carillon)", "Form'Action entreprise", "Formation Qualiopi", "Sensibilisation grand public"];
+const PUBLICS = ["Entreprise", "Commerces du Carillon", "Grand public", "Scolaire", "Bénévoles"];
 
 export default function Home() {
   const [persona, setPersona] = useState<Persona | null>(null);
+  const [sessions, setSessions] = useState(sessionsInitiales);
+  const [creation, setCreation] = useState(false);
+  const [erreur, setErreur] = useState<string | null>(null);
 
   if (!persona) {
     return (
@@ -50,6 +56,74 @@ export default function Home() {
         </button>
       </div>
       <div className={styles.body}>
+        {creation ? (
+          <form
+            className={styles.card}
+            onSubmit={(e) => {
+              e.preventDefault();
+              const donnees = new FormData(e.currentTarget);
+              const resultat = creerSession({
+                titre: String(donnees.get("titre") ?? ""),
+                date: String(donnees.get("date") ?? ""),
+                formateurice: String(donnees.get("formateurice") ?? ""),
+                module: String(donnees.get("module") ?? ""),
+                public: String(donnees.get("public") ?? ""),
+              });
+              if (!resultat.ok) {
+                setErreur(resultat.erreur);
+                return;
+              }
+              setSessions((liste) => [resultat.session, ...liste]);
+              setCreation(false);
+              setErreur(null);
+            }}
+          >
+            <div className={styles.field}>
+              <label htmlFor="titre">Titre de la session</label>
+              <input id="titre" name="titre" type="text" placeholder="ex. : Form'Action — Accenture" />
+            </div>
+            <div className={styles.field}>
+              <label htmlFor="module">Module de formation</label>
+              <select id="module" name="module" defaultValue={MODULES[0]}>
+                {MODULES.map((m) => (
+                  <option key={m}>{m}</option>
+                ))}
+              </select>
+            </div>
+            <div className={styles.field}>
+              <label htmlFor="public">Public ciblé</label>
+              <select id="public" name="public" defaultValue={PUBLICS[0]}>
+                {PUBLICS.map((p) => (
+                  <option key={p}>{p}</option>
+                ))}
+              </select>
+            </div>
+            <div className={styles.field}>
+              <label htmlFor="date">Date de la session</label>
+              <input id="date" name="date" type="date" />
+            </div>
+            <div className={styles.field}>
+              <label htmlFor="formateurice">Formatrice / Formateur</label>
+              <input id="formateurice" name="formateurice" type="text" placeholder="ex. : Amina Diallo" />
+            </div>
+            {erreur && <p className={styles.error}>{erreur}</p>}
+            <button type="submit" className={styles.btnPrimary}>Créer la session</button>
+            <button
+              type="button"
+              className={styles.btnSecondary}
+              onClick={() => {
+                setCreation(false);
+                setErreur(null);
+              }}
+            >
+              Annuler
+            </button>
+          </form>
+        ) : (
+          <button type="button" className={styles.btnPrimary} onClick={() => setCreation(true)}>
+            + Créer une session
+          </button>
+        )}
         {groupes.map((groupe) => (
           <section key={groupe.statut}>
             <p className={styles.sectionLabel}>{groupe.titre}</p>

@@ -63,19 +63,31 @@
 
 ## Itération 2 : La coordinatrice crée une session de formation
 
+⚠️ **Réduite en début d'itération** : le développeur a annoncé 15-20 minutes restantes (sur les 60 annoncées en début d'itération 1 — l'essentiel est parti dans l'incident Docker Hub). Sous ce budget, codage + publication + tour de test de 10 min ne tenaient plus ensemble. Choix fait avec le développeur : une version minimale, stockée en mémoire **côté front uniquement** (pas encore l'API), sans l'écran dédié « Participant·es » prévu à l'origine — tout tient sur l'écran principal, le formulaire remplace la liste le temps de la saisie.
+
 - **Dans le périmètre** :
-  - Formulaire de création de session : date, formateur, module, public, nombre de participants prévus.
-  - La session créée apparaît dans la liste de l'écran principal, avec le statut « Prévue » ou « En cours de remplissage ».
-- **Hors périmètre** : ajout des participant·es (itération 3), présences, validation, tableau de bord.
+  - Bouton « + Créer une session » sur l'écran principal, qui affiche un formulaire (titre, module, public, date, formateur·ice).
+  - La session créée apparaît dans la liste, au statut « À traiter ».
+- **Hors périmètre** : ajout des participant·es (toujours reporté à l'itération 3), présences, validation, tableau de bord, persistance côté API (la session créée ne survit pas à un rechargement de page).
 - **Critères d'acceptation** :
-  - Étant donné l'écran principal, quand je clique sur « Créer une session » et remplis le formulaire, alors la session apparaît dans la liste avec les champs saisis.
-  - Étant donné un champ obligatoire vide, quand je valide, alors la création est refusée avec un message clair.
+  - Étant donné l'écran principal, quand je clique sur « Créer une session » et remplis le formulaire avec un titre, alors la session apparaît dans la liste au statut « À traiter ». ✅
+  - Étant donné un titre vide, quand je valide, alors la création est refusée avec un message clair. ✅
 - **Hypothèse de l'équipe couverte** : aucune directement — pose la base du flux que l'itération 3 testera (émargement/présences).
-- **Codage estimé** : 8 minutes.
-- **Fichiers prévus** : `frontend/src/app/page.tsx` ou une nouvelle route de formulaire, un composant de formulaire, `api/src/routes.ts` (route de création), stockage en mémoire.
-- **Tests unitaires prévus** : 1 à 3, sur la validation du formulaire (champs obligatoires) et/ou la règle d'ajout à la liste.
-- **Étapes ajoutées à la démo** : créer une session « Form'Action Sopra Steria », vérifier qu'elle apparaît dans la liste.
-- **Bilan** : _à remplir en fin d'itération._
+- **Codage estimé** : 8 minutes (réduit en amont par le développeur, cf. ⚠️ ci-dessus).
+- **Fichiers prévus** : `frontend/src/app/page.tsx`, `frontend/src/app/sessions.ts`, `frontend/src/app/sessions.test.ts`, `frontend/src/app/page.module.css`.
+- **Tests unitaires prévus** : 1 à 3, sur la validation du formulaire (titre obligatoire) et la création de session.
+- **Étapes ajoutées à la démo** : reporté, faute de temps (hors DoD, ne bloque rien).
+- **Bilan** :
+  - Durée de codage réelle : 1 minute (très en dessous du budget réduit de 8 min).
+  - Critères satisfaits : les 2 critères réduits, cochés ci-dessus.
+  - Reporté à l'itération 3 : écran dédié « Participant·es », persistance via l'API (actuellement en mémoire côté front seulement — perdu au rechargement), nombre de participants prévus (champ non repris dans la version réduite).
+  - Le harnais n'a rien bloqué : `npm test` passe (4 tests frontend + 2 api), le contrat de déployabilité ne signale aucune borne.
+  - Déploiement : rapide (image frontend reconstruite sans nouveau pull, le stage nginx étant déjà remplacé par le stopgap Node de l'itération 1).
+  - **Modifications** :
+    - `frontend/src/app/sessions.ts` : ajout de `creerSession` (validation du titre, statut initial « à traiter ») — sert les 2 critères.
+    - `frontend/src/app/sessions.test.ts` : 2 tests sur `creerSession` (titre vide refusé, création valide).
+    - `frontend/src/app/page.tsx` : état de la liste des sessions passé en `useState`, formulaire de création inline (bascule affichage liste/formulaire).
+    - `frontend/src/app/page.module.css` : classes `field`, `error`, `btnPrimary`, `btnSecondary` pour le formulaire.
 
 ---
 

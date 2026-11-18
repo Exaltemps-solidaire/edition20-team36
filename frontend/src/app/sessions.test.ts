@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { grouperSessionsParStatut, type Session } from "./sessions";
+import { creerSession, grouperSessionsParStatut, type Session } from "./sessions";
 
 const session = (overrides: Partial<Session>): Session => ({
   id: "x",
@@ -33,5 +33,31 @@ describe("grouperSessionsParStatut", () => {
 
     expect(groupes).toHaveLength(1);
     expect(groupes[0].statut).toBe("en_cours");
+  });
+});
+
+describe("creerSession", () => {
+  const entree = {
+    titre: "Form'Action — Accenture",
+    date: "2026-12-01",
+    formateurice: "Amina Diallo",
+    module: "Fresque de la rue",
+    public: "Entreprise",
+  };
+
+  it("refuse un titre vide", () => {
+    const resultat = creerSession({ ...entree, titre: "  " });
+
+    expect(resultat.ok).toBe(false);
+  });
+
+  it("crée une session au statut à traiter avec un titre valide", () => {
+    const resultat = creerSession(entree);
+
+    expect(resultat.ok).toBe(true);
+    if (resultat.ok) {
+      expect(resultat.session.statut).toBe("a_traiter");
+      expect(resultat.session.titre).toBe(entree.titre);
+    }
   });
 });

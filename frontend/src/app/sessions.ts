@@ -67,3 +67,34 @@ export function grouperSessionsParStatut(liste: Session[]): GroupeSessions[] {
     sessions: liste.filter((session) => session.statut === groupe.statut),
   })).filter((groupe) => groupe.sessions.length > 0);
 }
+
+export type NouvelleSessionInput = {
+  titre: string;
+  date: string;
+  formateurice: string;
+  module: string;
+  public: string;
+};
+
+export type ResultatCreationSession =
+  | { ok: true; session: Session }
+  | { ok: false; erreur: string };
+
+// Stockage en mémoire, côté front, le temps de l'itération : voir adr.md.
+export function creerSession(input: NouvelleSessionInput): ResultatCreationSession {
+  if (!input.titre.trim()) {
+    return { ok: false, erreur: "Le titre de la session est obligatoire." };
+  }
+  return {
+    ok: true,
+    session: {
+      id: crypto.randomUUID(),
+      titre: input.titre.trim(),
+      date: input.date,
+      formateurice: input.formateurice,
+      module: input.module,
+      public: input.public,
+      statut: "a_traiter",
+    },
+  };
+}

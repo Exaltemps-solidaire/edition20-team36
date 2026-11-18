@@ -93,19 +93,30 @@
 
 ## Itération 3 : La coordinatrice ajoute les participant·es à une session
 
+⚠️ **Réduite en début d'itération**, même décision que l'itération 2 : 10-20 minutes annoncées, pas d'écran dédié « Participant·es » — l'ajout se fait en ligne sur la carte de la session, dans la liste principale.
+
 - **Dans le périmètre** :
-  - Depuis une session, formulaire d'ajout de participant·e : nom, prénom, mail, téléphone, entreprise.
-  - La liste des participant·es d'une session s'affiche sur l'écran de la session.
-- **Hors périmètre** : présences, upload de la feuille d'émargement, alerte de discordance, validation.
+  - Sur chaque carte de session (liste principale), bouton « + Ajouter un·e participant·e » → formulaire minimal (nom, email).
+  - Le nombre et la liste des participant·es s'affichent sous la carte.
+- **Hors périmètre** : écran dédié « Participant·es », téléphone/entreprise (champs non repris), présences, upload de la feuille d'émargement, alerte de discordance, validation.
 - **Critères d'acceptation** :
-  - Étant donné une session créée, quand j'ajoute un·e participant·e avec ses coordonnées, alors il/elle apparaît dans la liste de la session.
-  - Étant donné plusieurs participant·es ajouté·es, quand j'ouvre la session, alors je vois leur nombre et la liste complète.
+  - Étant donné une session, quand j'ajoute un·e participant·e avec un nom, alors il/elle apparaît dans la liste de cette session. ✅
+  - Étant donné un nom vide, quand je valide, alors l'ajout est refusé avec un message clair. ✅
 - **Hypothèse de l'équipe couverte** : prépare le terrain de l'hypothèse d'oubli de présence (testée à l'itération « alerte de discordance », à venir).
-- **Codage estimé** : 8 minutes.
-- **Fichiers prévus** : composant/écran de détail de session, formulaire d'ajout de participant·e, `api/src/routes.ts` (route d'ajout), stockage en mémoire.
-- **Tests unitaires prévus** : 1 à 3, sur la validation des champs participant et/ou le rattachement à la bonne session.
-- **Étapes ajoutées à la démo** : ouvrir la session créée, ajouter un·e participant·e, vérifier qu'il/elle apparaît.
-- **Bilan** : _à remplir en fin d'itération._
+- **Codage estimé** : 8 minutes (réduit en amont, comme l'itération 2).
+- **Fichiers prévus** : `frontend/src/app/sessions.ts`, `frontend/src/app/sessions.test.ts`, `frontend/src/app/page.tsx`.
+- **Tests unitaires prévus** : 1 à 3, sur la validation du nom et le rattachement à la bonne session.
+- **Étapes ajoutées à la démo** : reporté, faute de temps (hors DoD, ne bloque rien).
+- **Bilan** :
+  - Durée de codage réelle : 2 minutes (très en dessous du budget réduit de 8 min).
+  - Critères satisfaits : les 2 critères réduits, cochés ci-dessus.
+  - Reporté : écran dédié « Participant·es » (si une itération 4 a lieu), champs téléphone/entreprise, persistance via l'API (toujours en mémoire côté front, cf. itération 2).
+  - Le harnais n'a rien bloqué : `npm test` passe (6 tests frontend + 2 api), le contrat de déployabilité ne signale aucune borne.
+  - Déploiement : rapide, aucun nouveau pull d'image nécessaire.
+  - **Modifications** :
+    - `frontend/src/app/sessions.ts` : type `Participant`, champ `participants` sur `Session`, fonction `ajouterParticipant` (validation du nom) — sert les 2 critères.
+    - `frontend/src/app/sessions.test.ts` : 2 tests sur `ajouterParticipant` (nom vide refusé, ajout sans toucher aux autres participant·es).
+    - `frontend/src/app/page.tsx` : par carte de session, liste des participant·es + formulaire d'ajout inline (bascule par session via `sessionOuverte`).
 
 ---
 

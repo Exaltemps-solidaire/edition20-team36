@@ -1,5 +1,11 @@
 export type StatutSession = "a_traiter" | "en_cours" | "terminee";
 
+export type Participant = {
+  id: string;
+  nom: string;
+  email: string;
+};
+
 export type Session = {
   id: string;
   titre: string;
@@ -9,6 +15,7 @@ export type Session = {
   public: string;
   statut: StatutSession;
   resultat?: string;
+  participants: Participant[];
 };
 
 // Données fictives, le temps que l'itération 2 pose la création réelle de session.
@@ -21,6 +28,7 @@ export const sessions: Session[] = [
     module: "Fresque de la rue",
     public: "Entreprise",
     statut: "a_traiter",
+    participants: [],
   },
   {
     id: "voltaire",
@@ -30,6 +38,7 @@ export const sessions: Session[] = [
     module: "Fresque de la rue",
     public: "Grand public / Scolaire",
     statut: "en_cours",
+    participants: [],
   },
   {
     id: "carillon-11",
@@ -40,6 +49,7 @@ export const sessions: Session[] = [
     public: "Commerces",
     statut: "terminee",
     resultat: "12 personnes formées",
+    participants: [],
   },
   {
     id: "mairie-10",
@@ -50,6 +60,7 @@ export const sessions: Session[] = [
     public: "Grand public",
     statut: "terminee",
     resultat: "24 personnes sensibilisées",
+    participants: [],
   },
 ];
 
@@ -95,6 +106,29 @@ export function creerSession(input: NouvelleSessionInput): ResultatCreationSessi
       module: input.module,
       public: input.public,
       statut: "a_traiter",
+      participants: [],
     },
   };
+}
+
+export type NouveauParticipantInput = { nom: string; email: string };
+
+export type ResultatAjoutParticipant =
+  | { ok: true; session: Session }
+  | { ok: false; erreur: string };
+
+// Stockage en mémoire, côté front, le temps de l'itération : voir adr.md.
+export function ajouterParticipant(
+  session: Session,
+  input: NouveauParticipantInput,
+): ResultatAjoutParticipant {
+  if (!input.nom.trim()) {
+    return { ok: false, erreur: "Le nom du·de la participant·e est obligatoire." };
+  }
+  const participant: Participant = {
+    id: crypto.randomUUID(),
+    nom: input.nom.trim(),
+    email: input.email.trim(),
+  };
+  return { ok: true, session: { ...session, participants: [...session.participants, participant] } };
 }

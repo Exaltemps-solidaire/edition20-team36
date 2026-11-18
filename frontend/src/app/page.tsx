@@ -3,7 +3,12 @@
 import { useState } from "react";
 import styles from "./page.module.css";
 import { personas, type Persona } from "./personas";
-import { creerSession, grouperSessionsParStatut, sessions as sessionsInitiales } from "./sessions";
+import {
+  ajouterParticipant,
+  creerSession,
+  grouperSessionsParStatut,
+  sessions as sessionsInitiales,
+} from "./sessions";
 
 const MODULES = ["Fresque de la rue", "Accueil inconditionnel (Carillon)", "Form'Action entreprise", "Formation Qualiopi", "Sensibilisation grand public"];
 const PUBLICS = ["Entreprise", "Commerces du Carillon", "Grand public", "Scolaire", "Bénévoles"];
@@ -13,6 +18,8 @@ export default function Home() {
   const [sessions, setSessions] = useState(sessionsInitiales);
   const [creation, setCreation] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
+  const [sessionOuverte, setSessionOuverte] = useState<string | null>(null);
+  const [erreurParticipant, setErreurParticipant] = useState<string | null>(null);
 
   if (!persona) {
     return (
@@ -140,6 +147,70 @@ export default function Home() {
                     <span className={styles.badgeGreen}>{session.resultat}</span>
                   )}
                 </div>
+
+                <p className={styles.sectionLabel} style={{ marginTop: 12 }}>
+                  Participant·es ({session.participants.length})
+                </p>
+                {session.participants.map((p) => (
+                  <div key={p.id} className={styles.cardMeta}>
+                    {p.nom}
+                    {p.email ? ` · ${p.email}` : ""}
+                  </div>
+                ))}
+
+                {sessionOuverte === session.id ? (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const donnees = new FormData(e.currentTarget);
+                      const resultat = ajouterParticipant(session, {
+                        nom: String(donnees.get("nom") ?? ""),
+                        email: String(donnees.get("email") ?? ""),
+                      });
+                      if (!resultat.ok) {
+                        setErreurParticipant(resultat.erreur);
+                        return;
+                      }
+                      setSessions((liste) =>
+                        liste.map((s) => (s.id === session.id ? resultat.session : s)),
+                      );
+                      setSessionOuverte(null);
+                      setErreurParticipant(null);
+                    }}
+                  >
+                    <div className={styles.field}>
+                      <label htmlFor={`nom-${session.id}`}>Nom et prénom</label>
+                      <input id={`nom-${session.id}`} name="nom" type="text" placeholder="ex. : Julie Martin" />
+                    </div>
+                    <div className={styles.field}>
+                      <label htmlFor={`email-${session.id}`}>Email</label>
+                      <input id={`email-${session.id}`} name="email" type="email" placeholder="ex. : julie.martin@exemple.com" />
+                    </div>
+                    {erreurParticipant && <p className={styles.error}>{erreurParticipant}</p>}
+                    <button type="submit" className={styles.btnPrimary}>Ajouter</button>
+                    <button
+                      type="button"
+                      className={styles.btnSecondary}
+                      onClick={() => {
+                        setSessionOuverte(null);
+                        setErreurParticipant(null);
+                      }}
+                    >
+                      Annuler
+                    </button>
+                  </form>
+                ) : (
+                  <button
+                    type="button"
+                    className={styles.btnSecondary}
+                    onClick={() => {
+                      setSessionOuverte(session.id);
+                      setErreurParticipant(null);
+                    }}
+                  >
+                    + Ajouter un·e participant·e
+                  </button>
+                )}
               </div>
             ))}
           </section>

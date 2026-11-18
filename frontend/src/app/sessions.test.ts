@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { creerSession, grouperSessionsParStatut, type Session } from "./sessions";
+import { ajouterParticipant, creerSession, grouperSessionsParStatut, type Session } from "./sessions";
 
 const session = (overrides: Partial<Session>): Session => ({
   id: "x",
@@ -9,6 +9,7 @@ const session = (overrides: Partial<Session>): Session => ({
   module: "Module",
   public: "Public",
   statut: "a_traiter",
+  participants: [],
   ...overrides,
 });
 
@@ -58,6 +59,26 @@ describe("creerSession", () => {
     if (resultat.ok) {
       expect(resultat.session.statut).toBe("a_traiter");
       expect(resultat.session.titre).toBe(entree.titre);
+    }
+  });
+});
+
+describe("ajouterParticipant", () => {
+  it("refuse un nom vide", () => {
+    const resultat = ajouterParticipant(session({}), { nom: "  ", email: "a@b.fr" });
+
+    expect(resultat.ok).toBe(false);
+  });
+
+  it("ajoute le·la participant·e à la session sans modifier les autres participant·es", () => {
+    const depart = session({ participants: [{ id: "1", nom: "Déjà là", email: "x@y.fr" }] });
+
+    const resultat = ajouterParticipant(depart, { nom: "Julie Martin", email: "julie@exemple.com" });
+
+    expect(resultat.ok).toBe(true);
+    if (resultat.ok) {
+      expect(resultat.session.participants).toHaveLength(2);
+      expect(resultat.session.participants[1].nom).toBe("Julie Martin");
     }
   });
 });

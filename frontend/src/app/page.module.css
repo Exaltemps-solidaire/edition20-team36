@@ -1,5 +1,8 @@
 .page {
-  max-width: 420px;
+  /* Largeur fixe, demandée explicitement : même taille quelle que soit la fenêtre, y compris
+     sur un écran réel plus étroit que 420px (contenu alors rogné par overflow-x: hidden sur
+     body — voir globals.css). Avant : max-width, qui s'adaptait en dessous de 420px. */
+  width: 420px;
   margin: 0 auto;
   min-height: 100vh;
   background: #ffffff;
